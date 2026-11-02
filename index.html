@@ -46,6 +46,8 @@ h2{font-size:15px;margin:22px 0 8px;display:flex;justify-content:space-between;c
 .chips{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 12px}
 .chip{display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--mute);text-align:center;width:84px}
 .chip svg{width:60px;height:60px}
+.sbtn{font-size:12px;padding:2px 8px;margin-top:6px}
+.su{margin-top:6px;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;color:var(--mute);word-break:break-word}
 </style></head><body><div class="wrap">
 <h1>OLL checklist</h1>
 <div class="sub">All 57 cases with algs from <a href="https://www.cube.academy/oll-algs" target="_blank" rel="noopener">cube.academy</a>. Tap a card to tick it off. Progress saves in this browser.</div>
@@ -74,6 +76,7 @@ function svg(s){
   return r+'</svg>';
 }
 const app=document.getElementById("app");let n=0;const byId={};
+function inv(a){return a.replace(/[()]/g,"").trim().split(/\s+/).reverse().map(t=>{const m=t.match(/^([A-Za-z])(2)?(')?$/);if(!m)return t;return m[2]?m[1]+"2":m[3]?m[1]:m[1]+"'"}).join(" ")}
 DATA.forEach(([g,cs],gi)=>{
   const h=document.createElement("h2");h.innerHTML="<span>"+g+"</span><span class='gc'></span>";app.appendChild(h);
   const gr=document.createElement("div");gr.className="grid";
@@ -82,6 +85,10 @@ DATA.forEach(([g,cs],gi)=>{
     const el=document.createElement("label");el.className="card";
     el.innerHTML=svg(s)+'<div class="info"><div class="alg"></div></div><input type="checkbox" class="chk">';
     el.querySelector(".alg").textContent=a;
+    const inf=el.querySelector(".info"),sb=document.createElement("button"),sd=document.createElement("div");
+    sb.type="button";sb.className="sbtn";sb.textContent="Show setup";sd.className="su";sd.hidden=true;sd.textContent=inv(a);
+    sb.onclick=e=>{e.preventDefault();e.stopPropagation();sd.hidden=!sd.hidden;sb.textContent=sd.hidden?"Show setup":"Hide setup"};
+    inf.appendChild(sb);inf.appendChild(sd);
     const cb=el.querySelector("input");cb.checked=!!done[id];
     cb.onchange=()=>{if(cb.checked)done[id]=1;else delete done[id];save();upd()};
     el.dataset.id=id;gr.appendChild(el);
@@ -119,7 +126,7 @@ function renderFc(){
   const f=document.getElementById("fc");
   if(!cur||!done[cur])draw();
   if(!cur){f.innerHTML='<div class="mute">Tick some cases in the checklist below. Flashcards are drawn only from cases you marked as learned.</div>';return}
-  f.innerHTML='<div class="fcard" role="button" tabindex="0">'+svg(byId[cur][1])+'<div class="fcalg"></div></div><div class="fbtn"><button id="nx">Next case</button></div>';
+  f.innerHTML='<div class="fcard" role="button" tabindex="0">'+svg(byId[cur][1])+'<div class="fcalg"></div></div><div class="su" id="sd" hidden style="text-align:center"></div><div class="fbtn"><button id="sb">Show setup</button><button id="nx">Next case</button></div>';
   const box=f.querySelector(".fcard"),al=f.querySelector(".fcalg");
   function paint(){if(shown){al.className="fcalg";al.textContent=byId[cur][0]}else{al.className="fcalg hint";al.textContent="Tap the case to show or hide the alg"}}
   function tog(){
@@ -129,6 +136,8 @@ function renderFc(){
   }
   box.onclick=tog;box.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tog()}};
   f.querySelector("#nx").onclick=()=>{draw();renderFc();renderTrk()};
+  const sb=f.querySelector("#sb"),sd=f.querySelector("#sd");sd.textContent=inv(byId[cur][0]);
+  sb.onclick=()=>{sd.hidden=!sd.hidden;sb.textContent=sd.hidden?"Show setup":"Hide setup"};
   paint();
 }
 function chip(i){
