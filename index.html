@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OLL Checklist</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="OLL">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#17171a">
+
+<style>
+:root{--bg:#fafaf7;--card:#fff;--ink:#1c1c1a;--mute:#6b6b66;--line:#e2e1da;--acc:#2f7d4f;--yel:#f5d000;--blk:#3a3a3a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17171a;--card:#212125;--ink:#ececea;--mute:#9a9a94;--line:#34343a;--acc:#5fc388;--blk:#55555c}}
+:root[data-theme="dark"]{--bg:#17171a;--card:#212125;--ink:#ececea;--mute:#9a9a94;--line:#34343a;--acc:#5fc388;--blk:#55555c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 2px}
+.sub{color:var(--mute);font-size:13px;margin-bottom:12px}
+.sub a{color:var(--acc)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:8px 0 10px;border-bottom:1px solid var(--line)}
+.prog{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:6px 0}
+.prog i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:14px}
+button{font:inherit;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}
+h2{font-size:15px;margin:22px 0 8px;display:flex;justify-content:space-between;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.card{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;user-select:none}
+.card.done{border-color:var(--acc);opacity:.62}
+.card svg{flex:none;width:84px;height:84px}
+.info{min-width:0;flex:1}
+.alg{font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;word-break:break-word}
+.chk{flex:none;width:22px;height:22px;accent-color:var(--acc)}
+.hide .card.done,.hide h2.alldone,.hide .grid.alldone{display:none}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:14px}
+.panel h3{margin:0 0 8px;font-size:15px}
+.mute{color:var(--mute);font-size:13px}
+.fcard{display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;padding:6px;user-select:none}
+.fcard svg{width:190px;height:190px}
+.fcalg{min-height:48px;text-align:center;font:15px/1.5 ui-monospace,Menlo,Consolas,monospace;word-break:break-word}
+.fcalg.hint{color:var(--mute);font:13px system-ui,sans-serif}
+.fbtn{display:flex;justify-content:center;gap:8px;margin-top:6px}
+.stat{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:10px}.stat b{font-size:22px;display:block}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:6px 0 12px}
+.chip{display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--mute);text-align:center;width:84px}
+.chip svg{width:60px;height:60px}
+</style></head><body><div class="wrap">
+<h1>OLL checklist</h1>
+<div class="sub">All 57 cases with algs from <a href="https://www.cube.academy/oll-algs" target="_blank" rel="noopener">cube.academy</a>. Tap a card to tick it off. Progress saves in this browser.</div>
+<div class="bar"><div class="row"><b id="cnt">0 / 57 learned</b><span><button id="hb">Hide learned</button> <button id="rb">Reset</button></span></div><div class="prog"><i id="pb"></i></div></div>
+<div class="panel"><h3>Flashcards</h3><div id="fc"></div></div>
+<div class="panel"><h3>Recall tracker</h3><div id="trk"></div></div>
+<h2><span>Checklist</span></h2>
+<div id="app"></div>
+</div>
+<script>
+const DATA=[["Solved Cross",[["R U R' U (R U2 R')","010111110100100001000"],["(R U2 R') U' R U' R'","011111010000001100100"],["R U R' U (R U' R' U) R U2 R'","010111010000101000101"],["R U2 (R2 U') (R2 U') R2 U2 R","010111010001000001101"],["(R U R) D (R' U' R) D' R2","010111111000100000100"],["R2 D' (R U' R') D (R U R)","110111011001000000001"],["R2 D (R' U2 R) D' (R' U2 R')","111111010000000101000"]]],["T Shapes",[["F (R U R' U') F'","001111001010000010101"],["(R U R' U') (R' F R F')","001111001110000110000"]]],["Block Shapes",[["(r U2 R') U' R U' r'","011011000000001110110"],["(r' U2 R) U R' U r","000011011110100000011"]]],["Edges Only",[["(r U R' U') M (U R U' R')","111110101000010010000"],["(R U R' U') M' (U R U' r')","101111101010000010000"]]],["Lightning Shapes",[["r U R' U (R U2 r')","010110100100110011000"],["R' F' (r U' r') F2 R","010011001001000110110"],["r' (R2 U R' U R U2 R') U M'","000011110110100001010"],["r (R2 U' R U' R' U2 R) U' M","110011000001001110010"],["(f R' F' R) (U R U' R') S'","100111001010100110000"],["f' (r U r' U') (r' F r S)","001111100010000011100"]]],["P Shapes",[["F (U R U' R') F'","110110100000111010000"],["R' (U' F' U F) R","111110000000010111000"],["R' U' F (U R U' R') F' R","011011001100000110010"],["S (R U R' U') (R' F R f')","001011011110000100010"]]],["C Shapes",[["R' U' (R' F R F') U R","110010110000111000010"],["f R f' U' r' U' R U M'","011010011100010100010"]]],["Fish Shapes",[["(F R' F' R) (U R U' R')","110110001000110110000"],["R U2 R2' (F R F' R) U2 R'","100011011010100100010"],["(R U R' U') R' F (R2 U R' U') F'","010110001001010110100"],["R U R' U (R' F R F') R U2 R'","001110010110010001001"]]],["W Shapes",[["(R U R' U) R U' R' U' (R' F R F')","011110100100011010000"],["(L' U' L U') L' U L U (r U' r' F)","110011001001000010011"]]],["Hook Shapes",[["F (R U R' U') (R U R' U') F'","010110000001010011101"],["(F R' F' R) U2 (R U' R' U) R U2 R'","010110000101011010001"],["r U R' U (R U' R' U) R U2 r'","010011000000101010111"],["r' U' R U' (R' U R U') R' U2 r","000011010010101000111"],["r U' (r2' U) (r2 U) r2' U' r","010011000001000011111"],["r' U (r2 U') (r2' U') r2 U r'","000011010011000001111"]]],["Line Shapes",[["F (U R U' R') (U R U' R') F'","000111000110101110000"],["R' (F' U' F U') R U R' U R","010010010001010001111"],["r U r' (U R U' R') (U R U' R') r U' r'","000111000010101010101"],["R' F (R U R U') R2 F' R2 U' R' U (R U R')","000111000111000111000"]]],["L Shapes",[["r U r' (R U R' U') r U' r'","001111000010001110100"],["R' F' R (L' U' L U) R' F R","100111000010100011001"],["(F U R U') R2 F' R (U R U' R')","000111100110100011000"],["R' F (R U R') F' R (F U' F')","000111001011000110100"]]],["Awkward Shapes",[["r2 D' (r U r') D r2 U' (r' U' r)","101110010010011000001"],["F U (R U2 R' U') (R U2 R' U') F'","010110101000110010100"],["(R U R' U R U2 R') F (R U R' U') F'","010110101101010010000"],["R' U' F2 u' (R U R') D R2 B","011110001000010010101"]]],["Dot Cases",[["R U2 (R2 F R F') U2 (R' F R F')","000010000010111010111"],["f (U R U' R') S' (U R U' R') F'","000010000110111110010"],["(F R' F' R) U S' (R U' R') S","100010001010110110010"],["S' (R U R') S U' (R' F R F')","001010001110010110010"],["(r U R' U R U2 r') (r' U' R U' R' U2 r)","101010000010010111010"],["(R' F2 R2 U2 R') F' (R U2 R2 F2 R)","001010000010011110110"],["S R' U' (R U) (R U) R U' R' S'","101010101010010010010"],["(R' F2 R2 U2 R') F (R U2 R2 F2 R)","100010000010110011011"]]]];
+const KEY="oll-learned-v1";let done={};
+try{done=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){done={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}}
+function svg(s){
+  const c=34,o=14,k=(v,i)=>v==="1"?"var(--yel)":"var(--blk)";
+  let r='<svg viewBox="0 0 '+(o*2+c*3)+' '+(o*2+c*3)+'" aria-hidden="true">';
+  const rect=(x,y,w,h,v)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="3" fill="'+k(v)+'" stroke="var(--card)" stroke-width="2"/>';
+  for(let i=0;i<9;i++)r+=rect(o+(i%3)*c,o+Math.floor(i/3)*c,c,c,s[i]);
+  for(let i=0;i<3;i++){
+    r+=rect(o+i*c,1,c,o-3,s[9+i]);
+    r+=rect(o+c*3+2,o+i*c,o-3,c,s[12+i]);
+    r+=rect(o+i*c,o+c*3+2,c,o-3,s[15+i]);
+    r+=rect(1,o+i*c,o-3,c,s[18+i]);
+  }
+  return r+'</svg>';
+}
+const app=document.getElementById("app");let n=0;const byId={};
+DATA.forEach(([g,cs],gi)=>{
+  const h=document.createElement("h2");h.innerHTML="<span>"+g+"</span><span class='gc'></span>";app.appendChild(h);
+  const gr=document.createElement("div");gr.className="grid";
+  cs.forEach(([a,s],ci)=>{
+    n++;const id=gi+"-"+ci;byId[id]=[a,s,g];
+    const el=document.createElement("label");el.className="card";
+    el.innerHTML=svg(s)+'<div class="info"><div class="alg"></div></div><input type="checkbox" class="chk">';
+    el.querySelector(".alg").textContent=a;
+    const cb=el.querySelector("input");cb.checked=!!done[id];
+    cb.onchange=()=>{if(cb.checked)done[id]=1;else delete done[id];save();upd()};
+    el.dataset.id=id;gr.appendChild(el);
+  });
+  app.appendChild(gr);
+});
+function upd(){
+  let t=0;
+  document.querySelectorAll(".card").forEach(c=>{const d=!!done[c.dataset.id];c.classList.toggle("done",d);c.querySelector("input").checked=d;if(d)t++});
+  document.querySelectorAll(".grid").forEach((gr,i)=>{
+    const cards=gr.querySelectorAll(".card"),dn=gr.querySelectorAll(".card.done").length;
+    gr.classList.toggle("alldone",dn===cards.length);
+    const h=gr.previousElementSibling;h.classList.toggle("alldone",dn===cards.length);
+    h.querySelector(".gc").textContent=dn+"/"+cards.length;
+  });
+  document.getElementById("cnt").textContent=t+" / "+n+" learned";
+  document.getElementById("pb").style.width=(t/n*100)+"%";
+}
+document.getElementById("hb").onclick=function(){const h=document.body.classList.toggle("hide");this.textContent=h?"Show learned":"Hide learned"};
+document.getElementById("rb").onclick=()=>{if(confirm("Clear all progress?")){done={};save();upd()}};
+const SK="oll-stats-v1";let st={};
+try{st=JSON.parse(localStorage.getItem(SK)||"{}")}catch(e){st={}}
+function saveSt(){try{localStorage.setItem(SK,JSON.stringify(st))}catch(e){}}
+let cur=null,shown=false,counted=false;
+function pool(){return Object.keys(done).filter(i=>byId[i])}
+function draw(){
+  const p=pool();if(!p.length){cur=null;return}
+  const c=p.length>1?p.filter(i=>i!==cur):p;
+  const w=c.map(i=>st[i]&&st[i].l?3:1),tot=w.reduce((a,b)=>a+b,0);
+  let r=Math.random()*tot,k=0;while(k<w.length-1&&r>=w[k]){r-=w[k];k++}
+  cur=c[k];shown=false;counted=false;
+  const s=st[cur]=st[cur]||{s:0,c:0,l:0};s.s++;s.l=0;saveSt();
+}
+function renderFc(){
+  const f=document.getElementById("fc");
+  if(!cur||!done[cur])draw();
+  if(!cur){f.innerHTML='<div class="mute">Tick some cases in the checklist below. Flashcards are drawn only from cases you marked as learned.</div>';return}
+  f.innerHTML='<div class="fcard" role="button" tabindex="0">'+svg(byId[cur][1])+'<div class="fcalg"></div></div><div class="fbtn"><button id="nx">Next case</button></div>';
+  const box=f.querySelector(".fcard"),al=f.querySelector(".fcalg");
+  function paint(){if(shown){al.className="fcalg";al.textContent=byId[cur][0]}else{al.className="fcalg hint";al.textContent="Tap the case to show or hide the alg"}}
+  function tog(){
+    shown=!shown;
+    if(shown&&!counted){counted=true;const s=st[cur];s.c++;s.l=1;saveSt();renderTrk()}
+    paint();
+  }
+  box.onclick=tog;box.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tog()}};
+  f.querySelector("#nx").onclick=()=>{draw();renderFc();renderTrk()};
+  paint();
+}
+function chip(i){
+  const d=document.createElement("div");d.className="chip";d.title=byId[i][2];
+  d.innerHTML=svg(byId[i][1])+"<span></span>";
+  d.lastChild.textContent=st[i].s+" seen, "+st[i].c+" checked";return d;
+}
+function renderTrk(){
+  const t=document.getElementById("trk");
+  const ids=Object.keys(st).filter(i=>byId[i]);
+  let tc=0,seen=0;const ok=[],bad=[];
+  ids.forEach(i=>{const s=st[i];tc+=s.c;seen+=s.s;(s.l?bad:ok).push(i)});
+  t.innerHTML='<div class="stat"><div><b>'+tc+'</b><span class="mute">times checked the alg</span></div><div><b>'+seen+'</b><span class="mute">cards seen</span></div><div><b>'+ok.length+'</b><span class="mute">cases with no check needed</span></div></div>'+
+   '<div class="mute">No check needed (last time you saw them)</div><div class="chips" id="okc"></div>'+
+   '<div class="mute">Still checking</div><div class="chips" id="badc"></div><button id="rs">Reset recall stats</button>';
+  const oc=t.querySelector("#okc"),bc=t.querySelector("#badc");
+  ok.forEach(i=>oc.appendChild(chip(i)));bad.forEach(i=>bc.appendChild(chip(i)));
+  if(!ok.length)oc.innerHTML='<span class="mute">None yet</span>';
+  if(!bad.length)bc.innerHTML='<span class="mute">None yet</span>';
+  t.querySelector("#rs").onclick=()=>{if(confirm("Clear recall stats?")){st={};saveSt();cur=null;renderFc();renderTrk()}};
+}
+const _u=upd;upd=function(){_u();renderFc();renderTrk()};
+upd();
+if("serviceWorker" in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}
+</script></body></html>
